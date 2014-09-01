@@ -88,14 +88,12 @@
 
         <section>
           <section>
-            <h1>Interesting Types</h1>
+            <h1>Hitchhiker's Guide to Types</h1>
+            <img width="320" src="/images/hitchhikers_guide.jpg" alt="Don't Panic">
           </section>
 
           <section>
             <h2>Strings</h2>
-            <p>
-              "Code goes Here"
-            </p>
             <pre>
               <code class="ruby">
 "This is a string"
@@ -192,11 +190,56 @@ iex> self
           </section>
 
           <section>
+            <h2>Keyword Lists</h2>
+
+            <pre>
+              <code class="elixir">
+[test: 5, foo: 1]
+              </code>
+            </pre>
+            <div class="fragment roll-in">
+              <h4>The Ugly Truth:</h4>
+              <pre>
+                <code class="elixir">
+iex> [{:test, 5}, {:foo, 1}]
+=> [test: 5, foo: 1]
+                </code>
+              </pre>
+            </div>
+          </section>
+          <section>
             <h2>Maps</h2>
+            <pre>
+              <code class="elixir">
+%{test: 5, foo: 1}
+              </code>
+            </pre>
           </section>
 
           <section>
             <h2>Structs</h2>
+            <pre>
+              <code class="elixir">
+defmodule do
+  defstruct test: nil, foo: 0, bar: :baz
+end
+              </code>
+            </pre>
+            <pre>
+              <code class="elixir">
+iex> %MyModule{test: 5, foo: 1}
+=> %MyModule{test: 5, foo: 1, bar: baz}
+              </code>
+            </pre>
+            <div class="fragment roll-in">
+              <h4>How it Works:</h4>
+              <pre>
+                <code class="elixir">
+  iex> %{__struct__: MyModule, test: 5, foo: 1, bar: :baz}
+  => %MyModule{test: 5, foo: 1, bar: baz}
+                </code>
+              </pre>
+            </div>
           </section>
 
           <section>
@@ -207,6 +250,14 @@ fn
   ("foo") -> "bar"
   (other) -> other
 end
+
+              </code>
+            </pre>
+            <pre>
+              <code class="elixir">
+a = &(&1 + 2)
+iex> a.(2)
+=> 3
               </code>
             </pre>
           </section>
@@ -226,6 +277,17 @@ end
 
           <section>
             <h2>Modules</h2>
+              <pre>
+                <code class="elixir">
+defmodule MyModule do
+  def main(foo) do
+  end
+
+  defp main(foo, acc) do
+  end
+end
+                </code>
+              </pre>
           </section>
         </section>
 
@@ -265,6 +327,18 @@ end
           </section>
         </section>
 
+        <section>
+          <section>
+            <h2>List Comprehensions</h2>
+            <pre>
+              <code class="elixir">
+for x <- 0..10, y <- 0..10, rem(x, 2) == 0, y * x > 25 do
+  y - x
+end
+              </code>
+            </pre>
+          </section>
+        </section>
         <section>
           <section>
             <h1>Pattern Matching</h1>
@@ -309,7 +383,35 @@ variable = {:ok, 5}
             <h2>Creating an Actor</h2>
             <pre>
               <code class="elixir">
-Node.spawn
+pid = spawn(PlanetExpress, :deliver, [package])
+              </code>
+            </pre>
+
+          </section>
+          <section>
+            <img width="640" src="/images/good_news.jpg" alt="Good news, everyone!">
+            <pre>
+              <code class="elixir">
+send pid, "Good news, everyone!"
+              </code>
+            </pre>
+          </section>
+          <section>
+            <img width="240" src="/images/planet_express.jpg" alt="Planet Express">
+            <pre>
+              <code class="elixir">
+defmodule PlanetExpress do
+  def deliver(package) do
+    recieve do
+      {_pid, "Good news, everyone"} ->
+        ignore_professor
+      {pid, message} ->
+        IO.puts message
+        send pid, :ok
+        deliver package
+    end
+  end
+end
               </code>
             </pre>
           </section>
@@ -330,10 +432,74 @@ Node.spawn
             <pre>
               <code class="elixir">
 quote do
-  1 + 2
+  1 + unquote(2 * 3)
 end
 
-=> {:+, [context: Elixir, import: Kernel], [1, 2]}
+=> {:+, [context: Elixir, import: Kernel], [1, 6]}
+              </code>
+            </pre>
+          </section>
+
+          <section>
+            <pre>
+              <code class="elixir">
+defmacro unless(clause, options) do
+  do_clause   = Keyword.get(options, :do, nil)
+  else_clause = Keyword.get(options, :else, nil)
+  quote do
+    if(unquote(clause), do: unquote(else_clause), else: unquote(do_clause))
+  end
+end
+              </code>
+            </pre>
+
+            <pre class="fragment roll-in">
+              <code class="elixir">
+defmacro if(condition, clauses) do
+  do_clause = Keyword.get(clauses, :do, nil)
+  else_clause = Keyword.get(clauses, :else, nil)
+
+  optimize_boolean(quote do
+    case unquote(condition) do
+      x when x in [false, nil] -> unquote(else_clause)
+      _ -> unquote(do_clause)
+    end
+  end)
+end
+              </code>
+            </pre>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h1>Testing:</h1>
+            <h3>We all make mistakes</h3>
+
+            <img width="640" src="/images/fail.gif" alt="Fail">
+          </section>
+
+          <section>
+            <pre>
+              <code class="elixir">
+defmodule TestingTest do
+use ExUnit.Case
+
+  it "isn't wrong" do
+    refute 1 == 2
+    assert 1 == 1
+  end
+end
+              </code>
+            </pre>
+            <pre class="fragment roll-in">
+              <code>
+.
+
+Finished in 0.04 seconds (0.04s on load, 0.00s on tests)
+1 tests, 0 failures
+
+Randomized with seed 506801
               </code>
             </pre>
           </section>
@@ -343,25 +509,66 @@ end
           <section>
             <h1>Protocols:</h1>
             <h3>Duck Typing without the Ducks</h3>
+            <img width="640" src="/images/duckling.jpg" alt="Duckling">
+          </section>
+
+          <section>
+            <h2>Defining a Protocol</h2>
+          </section>
+
+          <section>
+            <h2>Implementing a Protocol</h2>
+          </section>
+
+          <section>
+            <h2>Using a Protocol</h2>
+          </section>
+
+        </section>
+
+        <section>
+          <section>
+            <h1>OTP:</h1>
+            <h3>Open Telecom Platform</h3>
+            <h5 class="fragment roll-in">Great name or greatest name?</h5>
+          </section>
+          <section>
+            <h3>OTP is a framework for building applications that are:</h3>
+            <ul>
+              <li class="fragment">Scalable</li>
+              <li class="fragment">Concurrent</li>
+              <li class="fragment">Fault Tolerant</li>
+            </ul>
+
+          </section>
+
+          <section>
+            <h2>GenServer</h2>
+          </section>
+
+          <section>
+            <h2>Supervisor</h2>
+          </section>
+
+          <section>
+            <h2>GenEvent</h2>
+          </section>
+
+          <section>
+            <h2>:gen_fsm</h2>
+          </section>
+
+          <section>
+            <h2>Agent</h2>
+          </section>
+
+          <section>
+            <h2>Task</h2>
           </section>
         </section>
 
         <section>
-          <h1>OTP:</h1>
-          <h3>Open Telecom Platform</h3>
-          <h4 class="fragment roll-in">WTF?!?</h4>
-        </section>
-
-        <section>
-          <h2>Clever Quotes</h2>
-          <p>
-            These guys come in two forms, inline: <q cite="http://searchservervirtualization.techtarget.com/definition/Our-Favorite-Technology-Quotations">
-              &ldquo;The nice thing about standards is that there are so many to choose from&rdquo;</q> and block:
-          </p>
-          <blockquote cite="http://searchservervirtualization.techtarget.com/definition/Our-Favorite-Technology-Quotations">
-            &ldquo;For years there has been a theory that millions of monkeys typing at random on millions of typewriters would
-            reproduce the entire works of Shakespeare. The Internet has proven this theory to be untrue.&rdquo;
-          </blockquote>
+          <h1>Questions?</h1>
         </section>
       </div>
     </div>
