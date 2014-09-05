@@ -50,6 +50,17 @@
           </p>
         </section>
 
+
+        <section>
+          <h1>What is it?</h1>
+          <p>
+            Elixir is a functional language on the Erlang virtual machine,
+            which focuses on concurrency, maintainability, and reliability.
+            It steals a lot of good ideas from both Ruby and Clojure
+            and shares their focus on pragmatism and simplicity.
+          </p>
+        </section>
+
         <section>
           <section>
             <h1>Why?</h1>
@@ -57,17 +68,17 @@
 
           <section>
             <h2>Concurrent</h2>
-            <img width="640" src="http://i.imgur.com/xha5iQT.gif" alt="Concurrent">
+            <img width="640" src="/images/concurrent.gif" alt="Concurrent">
           </section>
 
           <section>
             <h2>Fault Tolerant</h2>
-            <img width="640" src="http://i.imgur.com/EFa9ded.gif" alt="Fault Tolerant">
+            <img width="640" src="/images/fault_tolerant.gif" alt="Fault Tolerant">
           </section>
 
           <section>
             <h2>Distributed</h2>
-            <img width="640" src="http://i.imgur.com/ORmeoTW.gif" alt="Distributed">
+            <img width="640" src="/images/distributed.gif" alt="Distributed">
           </section>
 
           <section>
@@ -77,7 +88,7 @@
 
           <section>
             <h2>Hot Reloadable</h2>
-            <img width="640" src="https://i.imgur.com/8I6Msk4.gif" alt="Hot Reloadable">
+            <img width="640" src="/images/hot_reloadable.gif" alt="Hot Reloadable">
           </section>
 
           <section>
@@ -119,9 +130,17 @@ iex> String.upcase "josé"
 
           <section>
             <h2>Binaries</h2>
-            <p>
-              'Code goes Here'
-            </p>
+            <pre>
+              <code>
+<< "TAG",
+   title   :: [size(30), binary],
+   artist  :: [size(30), binary],
+   album   :: [size(30), binary],
+   year    :: [size(4),  binary],
+   comment :: [size(30), binary],
+   _rest   :: binary >> = id3_tag
+              </code>
+            </pre>
           </section>
 
 
@@ -220,7 +239,7 @@ iex> [{:test, 5}, {:foo, 1}]
             <h2>Structs</h2>
             <pre>
               <code class="elixir">
-defmodule do
+defmodule MyModule do
   defstruct test: nil, foo: 0, bar: :baz
 end
               </code>
@@ -257,7 +276,7 @@ end
               <code class="elixir">
 a = &(&1 + 2)
 iex> a.(2)
-=> 3
+=> 4
               </code>
             </pre>
           </section>
@@ -271,6 +290,10 @@ def baz("foo"), do: "bar"
 def baz(other) do
   other
 end
+
+defp foo do
+  "Hi!"
+end
               </code>
             </pre>
           </section>
@@ -280,10 +303,15 @@ end
               <pre>
                 <code class="elixir">
 defmodule MyModule do
-  def main(foo) do
-  end
+  require Bar
+  use Foo
+  import Baz
+  alias Quux as: Q
 
-  defp main(foo, acc) do
+  @inc 1
+
+  def main(number) do
+    main(number + @inc)
   end
 end
                 </code>
@@ -335,6 +363,9 @@ end
 for x <- 0..10, y <- 0..10, rem(x, 2) == 0, y * x > 25 do
   y - x
 end
+
+iex> << r::8, g::8, b::8 <- pixels >>, do: {r, g, b}
+=> [{213,45,132},{64,76,32},{76,0,0},{234,32,15}]
               </code>
             </pre>
           </section>
@@ -392,7 +423,7 @@ pid = spawn(PlanetExpress, :deliver, [package])
             <img width="640" src="/images/good_news.jpg" alt="Good news, everyone!">
             <pre>
               <code class="elixir">
-send pid, "Good news, everyone!"
+send pid, {self, "Good news, everyone!"}
               </code>
             </pre>
           </section>
@@ -514,10 +545,36 @@ Randomized with seed 506801
 
           <section>
             <h2>Defining a Protocol</h2>
+            <pre>
+              <code>
+defprotocol Blank do
+  def blank?(data)
+end
+              </code>
+            </pre>
           </section>
 
           <section>
             <h2>Implementing a Protocol</h2>
+            <pre>
+              <code>
+defprotocol Blank do
+  defimpl Blank, for: BitString do
+    def blank?(""), do: true
+    def blank?(_), do: false
+  end
+
+  defimpl Blank, for: List do
+    def blank?([]), do: true
+    def blank?(_),  do: false
+  end
+end
+
+defimpl Blank, for: User do
+  def blank?(user), do: Blank.blank?(user.name)
+end
+              </code>
+            </pre>
           </section>
 
           <section>
@@ -525,6 +582,28 @@ Randomized with seed 506801
           </section>
 
         </section>
+
+	<section>
+	  <section>
+	    <h1>Distributed Programming</h1>
+            <img width="500" src="/images/long_distance.jpg" alt="Long Distance">
+	  </section>
+
+	  <section>
+	    <h2>A Simple Example</h2>
+            <pre>
+              <code>
+$ iex --name thing_one@localhost
+$ iex --name thing_two@localhost
+
+iex> Node.connect :thing_one@localhost
+iex> Node.spawn(:thing_one@localhost, fn -> IO.puts("HELLO!") end)
+HELLO!
+=> #PID<9018.66.0>
+              </code>
+            </pre>
+	  </section>
+	</section>
 
         <section>
           <section>
@@ -544,67 +623,153 @@ Randomized with seed 506801
 
           <section>
             <h2>GenServer</h2>
-          </section>
+            <pre>
+              <code>
+defmodule Stack do
+  use GenServer
 
-          <section>
-            <h2>Supervisor</h2>
-          </section>
+  def start_link(initial_stack=[]) do
+    GenServer.start_link(__MODULE__, initial_stack)
+  end
 
-          <section>
-            <h2>GenEvent</h2>
-          </section>
+  def push(pid, item) do
+    GenServer.cast(pid, {:push, :world})
+  end
 
-          <section>
-            <h2>:gen_fsm</h2>
-          </section>
+  def pop(pid) do
+    GenServer.call(pid, :pop)
+  end
+            </code>
+          </pre>
+        </section>
+        <section>
+          <pre>
+            <code>
+  # API
+  def handle_call(:pop, _from, [h|t]) do
+    {:reply, h, t}
+  end
 
-          <section>
-            <h2>Agent</h2>
-          </section>
+  def handle_cast({:push, item}, state) do
+    {:noreply, [item|state]}
+  end
+end
+            </code>
+          </pre>
+        </section>
 
-          <section>
-            <h2>Task</h2>
-          </section>
+
+        <section>
+          <h2>Supervisor</h2>
+          <pre>
+            <code>
+defmodule MrBurns do
+  use Supervisor
+
+  def start_link do
+    Supervisor.start_link(__MODULE__, :ok)
+  end
+
+  def init(:ok) do
+    children = [worker(Homer, []), worker(Lenny, []), worker(Carl, [])]
+
+    supervise(children, strategy: :one_for_all)
+  end
+end
+            </code>
+          </pre>
         </section>
 
         <section>
-          <h1>Questions?</h1>
+          <h2>GenEvent</h2>
+          <pre>
+            <code>
+defmodule Forwarder do
+  use GenEvent
+  def handle_event(event, parent) do
+    send parent, event
+    {:ok, parent}
+  end
+end
+
+iex> {:ok, manager} = GenEvent.start_link
+=> {:ok, #PID<0.83.0>}
+iex> GenEvent.add_handler(manager, Forwarder, self())
+:ok
+iex> GenEvent.sync_notify(manager, {:hello, :world})
+:ok
+iex> flush
+{:hello, :world}
+            </code>
+          </pre>
         </section>
-      </div>
+
+        <section>
+          <h2>Agent</h2>
+          <pre>
+            <code>
+iex> {:ok, agent} = Agent.start_link fn -> [] end
+{:ok, #PID<0.57.0>}
+iex> Agent.update(agent, fn list -> ["eggs"|list] end)
+:ok
+iex> Agent.get(agent, fn list -> list end)
+["eggs"]
+iex> Agent.stop(agent)
+:ok
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h2>Task</h2>
+          <pre>
+            <code>
+task = Task.async(fn -> do_some_work() end)
+result  = do_some_other_work()
+result + Task.await(task)
+            </code>
+          </pre>
+        </section>
+      </section>
+
+      <section>
+        <h1>Questions?</h1>
+      </section>
     </div>
+  </div>
 
-    <script src="lib/js/head.min.js"></script>
-    <script src="js/reveal.min.js"></script>
+  <script src="lib/js/head.min.js"></script>
+  <script src="js/reveal.min.js"></script>
 
-    <script>
+  <script>
 
-      // Full list of configuration options available here:
-        // https://github.com/hakimel/reveal.js#configuration
-                        Reveal.initialize({
-                          controls: true,
-                                progress: true,
-                                history: true,
-                                center: true,
+    // Full list of configuration options available here:
+      // https://github.com/hakimel/reveal.js#configuration
+                      Reveal.initialize({
+                        controls: true,
+                              progress: true,
+                              history: true,
+                              center: true,
 
-                                theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
-                                transition: Reveal.getQueryHash().transition || 'linear', // default/cube/page/concave/zoom/linear/fade/none
+                              theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+                              transition: Reveal.getQueryHash().transition || 'linear', // default/cube/page/concave/zoom/linear/fade/none
 
-                                // Parallax scrolling
-                                // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
-                                // parallaxBackgroundSize: '2100px 900px',
+                              // Parallax scrolling
+                              // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+                              // parallaxBackgroundSize: '2100px 900px',
 
-                                // Optional libraries used to extend on reveal.js
-                                dependencies: [
-                                  { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
-                                        { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
-                                        { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
-                                        { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
-                                        { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
-                                        { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
-                                ]
-                        });
+                              // Optional libraries used to extend on reveal.js
+                              dependencies: [
+                                { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+                                      { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                                      { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                                      { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+                                      { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+                                      { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+                              ]
+                      });
 
-    </script>
+  </script>
 
   </body>
 </html>
