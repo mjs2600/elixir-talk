@@ -399,6 +399,8 @@ variable = {:ok, 5}
             <pre>
               <code class="elixir">
 5 = variable
+
+^variable = 5
               </code>
             </pre>
           </section>
@@ -555,19 +557,17 @@ end
           </section>
 
           <section>
-            <h2>Implementing a Protocol</h2>
+            <h3>Implementing a Protocol</h3>
             <pre>
               <code>
-defprotocol Blank do
-  defimpl Blank, for: BitString do
-    def blank?(""), do: true
-    def blank?(_), do: false
-  end
+defimpl Blank, for: BitString do
+  def blank?(""), do: true
+  def blank?(_), do: false
+end
 
-  defimpl Blank, for: List do
-    def blank?([]), do: true
-    def blank?(_),  do: false
-  end
+defimpl Blank, for: List do
+  def blank?([]), do: true
+  def blank?(_),  do: false
 end
 
 defimpl Blank, for: User do
@@ -579,18 +579,34 @@ end
 
           <section>
             <h2>Using a Protocol</h2>
+            <pre>
+              <code>
+defprotocol Enumerable do
+  def reduce(collection)
+end
+
+defimpl Enumerable, for: List do: ...
+defimpl Enumerable, for: String do: ...
+
+defmodule Enum do
+  def reduce(collection) do: Enumerable.reduce(collection)
+  def map(collection) do: Enumerable.reduce(...)
+  def filter(collection) do: Enumerable.reduce(...)
+end
+              </code>
+            </pre>
           </section>
 
         </section>
 
-	<section>
-	  <section>
-	    <h1>Distributed Programming</h1>
+        <section>
+          <section>
+            <h1>Distributed Programming</h1>
             <img width="500" src="/images/long_distance.jpg" alt="Long Distance">
-	  </section>
+          </section>
 
-	  <section>
-	    <h2>A Simple Example</h2>
+          <section>
+            <h2>A Simple Example</h2>
             <pre>
               <code>
 $ iex --name thing_one@localhost
@@ -602,8 +618,8 @@ HELLO!
 => #PID<9018.66.0>
               </code>
             </pre>
-	  </section>
-	</section>
+          </section>
+        </section>
 
         <section>
           <section>
@@ -612,7 +628,7 @@ HELLO!
             <h5 class="fragment roll-in">Great name or greatest name?</h5>
           </section>
           <section>
-            <h3>OTP is a framework for building applications that are:</h3>
+            <h3>OTP is a framework for building</h3><h3>applications that are:</h3>
             <ul>
               <li class="fragment">Scalable</li>
               <li class="fragment">Concurrent</li>
@@ -633,7 +649,7 @@ defmodule Stack do
   end
 
   def push(pid, item) do
-    GenServer.cast(pid, {:push, :world})
+    GenServer.cast(pid, {:push, item})
   end
 
   def pop(pid) do
@@ -730,6 +746,11 @@ result + Task.await(task)
             </code>
           </pre>
         </section>
+      </section>
+
+      <section>
+        <h3>Is it ready to use in production?</h3>
+        <h1 class="fragment roll-in">Yes!</h1>
       </section>
 
       <section>
